@@ -6,7 +6,7 @@ float maxS = 1.0;
 float minB = 0.6;
 float maxB = 1.0;
 
-float alpha = 0.05;
+float alpha = 0.02;
 
 float transStart = 0.35;
 float transWidth = 0.01;
@@ -24,7 +24,7 @@ float radTransWidth = 0.0;
 float ah = 0.02;
 float as = 0.055;
 float ab = 0.055;
-float af = 0.008;
+float af = 0.015;
 float ag = 1.0;
 
 float th = 0.001;
@@ -32,7 +32,7 @@ float ts = 0.030;
 float tb = 0.010;
 float tf = 0.005;
 float tc = 0.003;
-float tA = 0.2;
+float tA = 0.02;
 
 int numSpokes = 12;
 float ang;
@@ -40,6 +40,8 @@ int w = 1;
 
 float[] px;
 float[] py;
+int[] mx;
+int[] my;
 float[] pf;
 int[] pa;
 
@@ -60,7 +62,8 @@ int startSeconds;
 float xRes;
 float yRes;
 void setup() {
-  size( 1280, 1028 );
+  frameRate(20);
+  size( 800, 480 );
   xRes = float(width);
   yRes = float(height);
   centerH = random(0, 1);
@@ -81,6 +84,8 @@ void setup() {
 
   px = new float[(width/2)*(height/2)];
   py = new float[(width/2)*(height/2)];
+  mx = new int[(width/2)*(height/2)];
+  my = new int[(width/2)*(height/2)];
   pf = new float[(width/2)*(height/2)];
   pa = new int[(width/2)*(height/2)];
   for ( int x = 0; x < width/2; x++ ) {
@@ -89,12 +94,14 @@ void setup() {
       float y2 = float(y) + 0.5;
       PVector v = new PVector( x2, y2 );
       float a = (v.heading() + PI)%ang;
+      //println(ang/PI*180);
       if ( a > 0.5*ang ) { 
         a = ang - a;
       }
       float r = v.mag();
       px[x+y*width/2] = r*cos(a);
       py[x+y*width/2] = r*sin(a);
+
       if ( r < radTransStart*yRes ) {
         pf[x+y*width/2] = 0;
       } else if  (r >= (radTransStart)*yRes && r < (radTransStart+radTransWidth)*yRes ) {
@@ -117,38 +124,40 @@ void draw() {
   float transEnd = transStart + transWidth;
   float transEnd2 = transStart2 + transWidth2;
   for ( int x = 0; x < width/2; x++ ) {
-    for ( int y = 0; y<=x && y<height/2; y++ ) {
-      float x2 = px[x+y*width/2];
-      float y2 = py[x+y*width/2];
-
-      float f = noise( ag*af*(30*xRes + x2), ag*af*(30*yRes + y2), tf*t ) * pf[x+y*width/2] ;
-      color c = color( 0 , 0 , 0 );
-      boolean pixelDone = false;
-      for( int i = 0 ; i < bandStart.length ; i++ ) {
-        if( f > bandStart[i] && f < bandStart[i] + bandWidth ) {
-          pixelDone = true;
-          //c = lerpColor( P[x+y*width/2], color(255, 255, 255), alpha );
-          c = lerpColor( P[x+y*width/2], bandColor[i], alpha );
+    for ( int y = 0; y<height/2; y++ ) {
+      if( y<=x ) {
+        float x2 = px[x+y*width/2];
+        float y2 = py[x+y*width/2];
+  
+        float f = noise( ag*af*(30*xRes + x2), ag*af*(30*yRes + y2), tf*t ) * pf[x+y*width/2] ;
+        color c = color( 0 , 0 , 0 );
+        boolean pixelDone = false;
+        for( int i = 0 ; i < bandStart.length ; i++ ) {
+          if( f > bandStart[i] && f < bandStart[i] + bandWidth ) {
+            pixelDone = true;
+            //c = lerpColor( P[x+y*width/2], color(255, 255, 255), alpha );
+            c = lerpColor( P[x+y*width/2], bandColor[i], alpha );
+          }
         }
-      }
-      if ( !pixelDone ) {
-        if ( pa[x+y*width/2] < 80 ) {
-          c = lerpColor( P[x+y*width/2], color(0, 0, 0), alpha );
-          pa[x+y*width/2]++;
-        } else { 
-          c = color( 0, 0, 0 );
+        if ( !pixelDone ) {
+          if ( pa[x+y*width/2] < 80 ) {
+            c = lerpColor( P[x+y*width/2], color(0, 0, 0), alpha );
+            pa[x+y*width/2]++;
+          } else { 
+            c = color( 0, 0, 0 );
+          }
         }
-      }
-      P[x+y*width/2] = c;
-      pixels[ (width/2+x) + (height/2+y)*width ] = c;
-      pixels[ (width/2+x) + (height/2-y)*width ] = c;
-      pixels[ (width/2-x) + (height/2+y)*width ] = c;
-      pixels[ (width/2-x) + (height/2-y)*width ] = c;
-      if ( x < height/2 ) {
-        pixels[ (width/2+y) + (height/2+x)*width ] = c;
-        pixels[ (width/2+y) + (height/2-x)*width ] = c;
-        pixels[ (width/2-y) + (height/2+x)*width ] = c;
-        pixels[ (width/2-y) + (height/2-x)*width ] = c;
+        P[x+y*width/2] = c;
+        pixels[ (width/2+x) + (height/2+y)*width ] = c;
+        pixels[ (width/2+x) + (height/2-y)*width ] = c;
+        pixels[ (width/2-x) + (height/2+y)*width ] = c;
+        pixels[ (width/2-x) + (height/2-y)*width ] = c;
+        if ( x < height/2 ) {
+          pixels[ (width/2+y) + (height/2+x)*width ] = c;
+          pixels[ (width/2+y) + (height/2-x)*width ] = c;
+          pixels[ (width/2-y) + (height/2+x)*width ] = c;
+          pixels[ (width/2-y) + (height/2-x)*width ] = c;
+        }
       }
     }
   }
