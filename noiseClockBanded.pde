@@ -6,7 +6,7 @@ float maxS = 1.0;
 float minB = 0.6;
 float maxB = 1.0;
 
-float alpha = 0.02;
+float alpha = 0.5;
 
 float transStart = 0.35;
 float transWidth = 0.01;
@@ -25,14 +25,14 @@ float ah = 0.02;
 float as = 0.055;
 float ab = 0.055;
 float af = 0.015;
-float ag = 1.0;
+float ag = 0.80;
 
 float th = 0.001;
 float ts = 0.030;
 float tb = 0.010;
 float tf = 0.005;
 float tc = 0.003;
-float tA = 0.02;
+float tA = 0.2;
 
 int numSpokes = 12;
 float ang;
@@ -62,7 +62,7 @@ int startSeconds;
 float xRes;
 float yRes;
 void setup() {
-  frameRate(20);
+  //frameRate(20);
   size( 800, 480 );
   xRes = float(width);
   yRes = float(height);
