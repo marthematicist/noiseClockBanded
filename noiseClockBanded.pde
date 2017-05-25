@@ -59,6 +59,10 @@ float backEnd = 0.04;
 int startTime;
 int startSeconds;
 
+int pressTime = 0;
+int pressTimeout = 4000;
+boolean mPressed = false;
+
 float xRes;
 float yRes;
 void setup() {
@@ -195,10 +199,26 @@ void draw() {
   if ( frameCount%25 == 0 ) {
     println(frameRate);
   }
+  
+  if( mPressed ) {
+    if( pressTime + pressTimeout < millis() ) {
+      println( pressTime , pressTimeout , millis() );
+      exit();
+    }
+  }
 }
 
 void mouseClicked() { 
   noiseSeed( millis() );
+}
+
+void mousePressed() {
+  pressTime = millis();
+  mPressed = true;
+}
+
+void mouseReleased() {
+  mPressed = false;
 }
 
 void mouseMoved() {
